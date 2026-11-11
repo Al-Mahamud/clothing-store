@@ -231,7 +231,7 @@ public class DemoData {
     );
 
     @Bean
-    ApplicationRunner demoData(JdbcClient jdbc, TransactionTemplate tx, StoreProperties properties) {
+    ApplicationRunner demoDataLoader(JdbcClient jdbc, TransactionTemplate tx, StoreProperties properties) {
         return new Loader(jdbc, tx, properties.storageRoot().resolve("demo"));
     }
 

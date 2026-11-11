@@ -33,24 +33,29 @@ public final class DemoArt {
         return document(crop, backdrop(hex, 600, 800) + garment(garment, fabric, hex, "g", ""));
     }
 
-    /** A wide banner with several garments, for collections and the home page. */
+    /** A banner with several garments laid over each other, for collections and the home page. */
     public static String banner(String background, Object[]... looks) {
-        StringBuilder body = new StringBuilder();
-        body.append("<rect width=\"1600\" height=\"1000\" fill=\"").append(background).append("\"/>");
-        body.append("<rect width=\"1600\" height=\"1000\" fill=\"url(#bannerLight)\"/>");
         int n = looks.length;
-        for (int i = 0; i < n; i++) {
+        double scale = n >= 3 ? 0.8 : 0.9;
+        double[] centers = n >= 3 ? new double[] {255, 945, 600} : new double[] {410, 790};
+        // Draw the outer garments first so the middle one lies on top.
+        int[] order = n >= 3 ? new int[] {0, 2, 1} : new int[] {0, 1};
+        StringBuilder body = new StringBuilder();
+        body.append("<rect width=\"1200\" height=\"1000\" fill=\"").append(background).append("\"/>");
+        body.append("<rect width=\"1200\" height=\"1000\" fill=\"url(#bannerLight)\"/>");
+        for (int k = 0; k < Math.min(n, centers.length); k++) {
+            int i = order[k];
             Object[] look = looks[i];
-            double scale = n >= 3 ? 0.98 : 1.08;
-            double x = 800 - (n * 600 * scale * 0.78) / 2 + i * 600 * scale * 0.78 - 20;
-            double y = (1000 - 800 * scale) / 2 + 40 + (i % 2 == 1 ? -18 : 0);
-            String transform = String.format(Locale.ROOT, "translate(%.0f %.0f) scale(%.2f)", x, y, scale);
+            double s = (n >= 3 && i != 1) ? scale * 0.94 : scale;
+            double x = centers[k] - 300 * s;
+            double y = (1000 - 800 * s) / 2 + (n >= 3 && i != 1 ? 40 : 10);
+            String transform = String.format(Locale.ROOT, "translate(%.0f %.0f) scale(%.3f)", x, y, s);
             body.append(garment((Garment) look[0], (Fabric) look[1], (String) look[2], "b" + i, transform));
         }
         String defs = "<defs><radialGradient id=\"bannerLight\" cx=\"50%\" cy=\"30%\" r=\"80%\">"
                 + "<stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\".22\"/>"
                 + "<stop offset=\"1\" stop-color=\"#000\" stop-opacity=\".12\"/></radialGradient></defs>";
-        return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1600 1000\" preserveAspectRatio=\"xMidYMid slice\">"
+        return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1200 1000\" preserveAspectRatio=\"xMidYMid slice\">"
                 + defs + body + "</svg>";
     }
 
