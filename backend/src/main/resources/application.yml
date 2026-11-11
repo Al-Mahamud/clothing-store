@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: tanti-store
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tanti}
+    username: ${DB_USERNAME:tanti}
+    password: ${DB_PASSWORD:}
+  flyway:
+    locations: classpath:db/migration
+  jackson:
+    time-zone: UTC
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 9MB
+  session:
+    timeout: 14d
+    jdbc:
+      initialize-schema: never
+
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: true
+        same-site: lax
+        max-age: 14d
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+store:
+  storage-root: ${STORAGE_ROOT:storage}
+  media-url: /media
