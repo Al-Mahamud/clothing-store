@@ -23,7 +23,7 @@ class SecurityConfig {
                 .logout(logout -> logout.disable())
                 .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/media/**", "/actuator/health").permitAll()
+                        .requestMatchers("/media/**", "/actuator/health", "/error").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/account/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()

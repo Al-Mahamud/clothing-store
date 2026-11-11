@@ -39,3 +39,7 @@ management:
 store:
   storage-root: ${STORAGE_ROOT:storage}
   media-url: /media
+  delivery:
+    inside-dhaka: 70
+    outside-dhaka: 130
+    free-over: 3000

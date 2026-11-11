@@ -77,3 +77,61 @@ export type Home = {
   newArrivals: ProductCard[];
   bestSellers: ProductCard[];
 };
+
+export type CartLine = {
+  variantId: number;
+  productId: number;
+  slug: string;
+  name: string;
+  color: string;
+  colorHex: string;
+  size: string;
+  sku: string;
+  image: string | null;
+  unitPrice: number;
+  compareAtPrice: number | null;
+  quantity: number;
+  stock: number;
+  lineTotal: number;
+  problem: "UNAVAILABLE" | "OUT_OF_STOCK" | "NOT_ENOUGH_STOCK" | null;
+};
+
+export type Cart = {
+  items: CartLine[];
+  itemCount: number;
+  subtotal: number;
+  discount: number;
+  coupon: { code: string; description: string; discount: number; freeShipping: boolean } | null;
+  couponProblem: string | null;
+  total: number;
+  freeDeliveryOver: number;
+  remainingForFreeDelivery: number;
+  canCheckout: boolean;
+};
+
+export type Zone = "DHAKA" | "OUTSIDE";
+
+export type Quote = { subtotal: number; discount: number; shippingFee: number; total: number; couponCode: string | null };
+
+export type OrderView = {
+  number: string;
+  status: "PENDING_PAYMENT" | "PLACED" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  paymentMethod: "COD" | "ONLINE";
+  paymentStatus: "UNPAID" | "PAID" | "REFUNDED";
+  placedAt: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  address: string;
+  area: string;
+  city: string;
+  zone: Zone;
+  note: string | null;
+  items: { slug: string; name: string; color: string; size: string; image: string | null; unitPrice: number; quantity: number; lineTotal: number }[];
+  subtotal: number;
+  discount: number;
+  shippingFee: number;
+  total: number;
+  couponCode: string | null;
+  events: { status: string; note: string | null; at: string }[];
+};

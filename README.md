@@ -21,6 +21,9 @@ cd backend
 ./mvnw spring-boot:test-run   # run on :8080 with a fresh database full of demo products
 ```
 
+Demo coupons: `WELCOME10` (10% off over ৳1,000, up to ৳500), `EID500` (৳500 off over ৳4,000),
+`FREESHIP` (free delivery over ৳1,500) and `SUMMER20` (expired, for testing).
+
 Demo product images are drawn by `backend/src/test/java/.../support/DemoArt.java` and written to
 `backend/storage/demo/`. Real photos are uploaded through the admin (phase 6).
 

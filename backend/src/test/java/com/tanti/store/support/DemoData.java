@@ -291,6 +291,11 @@ public class DemoData {
                             new Object[] {Garment.TROUSERS, Fabric.PLAIN, SAND.hex()},
                             new Object[] {Garment.KURTI, Fabric.PRINT, TEAL.hex()}));
 
+            coupon("WELCOME10", "10% off your first order", "PERCENT", 10, 500, 1000, null);
+            coupon("EID500", "৳500 off orders over ৳4,000", "FIXED", 500, null, 4000, null);
+            coupon("FREESHIP", "Free delivery on orders over ৳1,500", "FREE_SHIPPING", 0, null, 1500, null);
+            coupon("SUMMER20", "Last summer's sale", "PERCENT", 20, null, 0, Instant.now().minus(Duration.ofDays(30)));
+
             Instant now = Instant.now();
             for (int i = 0; i < PRODUCTS.size(); i++) {
                 product(PRODUCTS.get(i), i, now);
@@ -304,6 +309,17 @@ public class DemoData {
                          where p.category_id in (select id from categories where id = c.id or parent_id = c.id)
                          order by p.sold_count desc, pc.position, pi.position limit 1)
                     """).update();
+        }
+
+        private void coupon(String code, String description, String kind, int value, Integer maxDiscount,
+                            int minSubtotal, Instant endsAt) {
+            jdbc.sql("""
+                            insert into coupons (code, description, kind, value, max_discount, min_subtotal, ends_at)
+                            values (:code, :description, :kind, :value, :max, :min, :ends)""")
+                    .param("code", code).param("description", description).param("kind", kind).param("value", value)
+                    .param("max", maxDiscount).param("min", minSubtotal)
+                    .param("ends", endsAt == null ? null : Timestamp.from(endsAt))
+                    .update();
         }
 
         private void category(String parent, String name, String slug, String description, int position) {
@@ -411,7 +427,8 @@ public class DemoData {
         }
 
         static String slug(String text) {
-            return text.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
+            String plain = java.text.Normalizer.normalize(text, java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+            return plain.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
         }
     }
 }

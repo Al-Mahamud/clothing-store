@@ -52,11 +52,20 @@ public final class ApiClient {
         return send("DELETE", path, null);
     }
 
+    /** A write without the CSRF header, to prove the protection works. */
+    public Response postWithoutCsrf(String path, Object body) {
+        return send("POST", path, body, false);
+    }
+
     private Response send(String method, String path, Object body) {
+        return send(method, path, body, true);
+    }
+
+    private Response send(String method, String path, Object body, boolean withCsrf) {
         try {
             HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(baseUrl + path))
                     .header("Accept", "application/json");
-            if (!method.equals("GET")) {
+            if (!method.equals("GET") && withCsrf) {
                 request.header("X-XSRF-TOKEN", csrfToken());
             }
             if (body != null) {

@@ -200,14 +200,24 @@ No extra state library.
 
 Each phase ends with passing tests, a commit and a short note of what changed.
 
-| # | Phase | Contents |
-|---|---|---|
-| 0 | Plan and skeleton | this plan, backend and frontend projects, README |
-| 1 | Catalog backend | schema, catalog API with filters and facets, home endpoint, demo data, tests |
-| 2 | Storefront | design system, header/footer, home, listing with filters, product page |
-| 3 | Cart and checkout | cart API and drawer, coupons, delivery fee, COD orders, thank-you page, tracking |
-| 4 | Accounts | register/sign in, cart merge, addresses, order history, wishlist |
-| 5 | Online payment | SSLCommerz with fake local gateway, payment expiry job |
-| 6 | Admin | dashboard, products editor with images, orders, categories, collections, coupons, customers |
-| 7 | Reviews, notifications, SEO | reviews, order emails/SMS, metadata, sitemap, Open Graph images |
-| 8 | Launch readiness | Docker, Caddy, backups, CI, real payment credentials, content pages |
+| # | Phase | Contents | Status |
+|---|---|---|---|
+| 0 | Plan and skeleton | this plan, backend and frontend projects, README | done |
+| 1 | Catalog backend | schema, catalog API with filters and facets, home endpoint, demo data, tests | done |
+| 2 | Storefront | design system, header/footer, home, listing with filters, product page | done |
+| 3 | Cart and checkout | cart API and drawer, coupons, delivery fee, COD orders, thank-you page, tracking | done |
+| 4 | Accounts | register/sign in, cart merge, addresses, order history, wishlist | |
+| 5 | Online payment | SSLCommerz with fake local gateway, payment expiry job | |
+| 6 | Admin | dashboard, products editor with images, orders, categories, collections, coupons, customers | |
+| 7 | Reviews, notifications, SEO | reviews, order emails/SMS, metadata, sitemap, Open Graph images | |
+| 8 | Launch readiness | Docker, Caddy, backups, CI, real payment credentials, content pages | |
+
+### Notes from building
+
+- The bag is kept on the server, keyed by an http-only `tanti_cart` cookie (60 days). The bag id is
+  random, so guessing another shopper's bag is not practical.
+- Guests open their thank-you page with a random token in the link; tracking needs the order
+  number plus the phone number used.
+- The home page is built at `next build` time and refreshed every 30 s, so the backend must be
+  reachable during a production build (phase 8 deals with this in the deploy setup).
+- Footer links to `/pages/*` and the header account and wishlist icons lead nowhere until phases 4 and 7.
