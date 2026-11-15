@@ -35,6 +35,10 @@ Admin area: http://localhost:3000/admin, staff mobile `01999999999`, password `t
 (Farhana, the store manager). On a real server the first staff account comes from `ADMIN_PHONE` and
 `ADMIN_PASSWORD`.
 
+The demo shop has 16 reviews with fit answers; Nadia has reviewed her three-piece and can review her
+other delivered pieces. Set `NEXT_PUBLIC_SITE_URL` to the shop's public address so the sitemap and
+share links point at it.
+
 Online payment in local runs goes to a fake SSLCommerz page (test sources only, no real money).
 For the real sandbox, set `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWORD` and a public `WEB_URL`.
 

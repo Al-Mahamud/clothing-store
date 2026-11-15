@@ -66,6 +66,7 @@ public class ProductSearch {
         }
         String sql = """
                 select p.id, p.slug, p.name, c.name as category, p.price, p.compare_at_price, p.created_at,
+                       p.rating, p.review_count,
                        (select coalesce(json_agg(json_build_object('name', pc.name, 'hex', pc.hex)
                                                  order by pc.position), '[]')
                           from product_colors pc where pc.product_id = p.id) as colors,
@@ -98,7 +99,9 @@ public class ProductSearch {
                 images.length > 1 ? images[1] : null,
                 json.readValue(rs.getString("colors"), SWATCHES),
                 rs.getTimestamp("created_at").toInstant().isAfter(newSince),
-                !rs.getBoolean("in_stock"));
+                !rs.getBoolean("in_stock"),
+                rs.getBigDecimal("rating") == null ? null : rs.getBigDecimal("rating").doubleValue(),
+                rs.getInt("review_count"));
     }
 
     private static String[] strings(Array array) throws SQLException {

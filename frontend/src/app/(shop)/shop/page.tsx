@@ -3,7 +3,11 @@ import { Listing } from "@/components/shop/Listing";
 import { first, type SearchParams } from "@/lib/listing";
 import { api } from "@/lib/api";
 
-export const metadata: Metadata = { title: "Shop all" };
+export const metadata: Metadata = {
+  title: "Shop all",
+  description: "Panjabis, kurtis, three-pieces, shirts, tees and kids' clothes, filtered by size, colour and price.",
+  alternates: { canonical: "/shop" },
+};
 
 export default async function ShopPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;

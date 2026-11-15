@@ -9,7 +9,7 @@ import { dateTime } from "@/lib/format";
 import { Empty, Loading, PageHeader, Stat, btn, input } from "@/components/admin/ui";
 import { useAdmin } from "@/components/admin/AdminShell";
 
-const kinds = { CODE: "Sign-up code", ORDER_PLACED: "Order confirmed", ORDER_SHIPPED: "On the way", ORDER_CANCELLED: "Cancelled", CARE_REMINDER: "Care reminder" } as const;
+const kinds = { CODE: "Sign-up code", ORDER_PLACED: "Order received", ORDER_SHIPPED: "Sent out", ORDER_CANCELLED: "Cancelled" } as const;
 const tones = { QUEUED: "bg-clay/40 text-ink", SENDING: "bg-clay/40 text-ink", SENT: "bg-ok/15 text-ok", FAILED: "bg-sale/10 text-sale" } as const;
 
 export default function TextsPage() {

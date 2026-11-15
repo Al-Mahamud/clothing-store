@@ -3,6 +3,7 @@ package com.tanti.store.admin;
 import com.tanti.store.catalog.ColorFamily;
 import com.tanti.store.catalog.SizeOrder;
 import com.tanti.store.shared.ApiException;
+import com.tanti.store.shared.Pictures;
 import com.tanti.store.shared.StoreProperties;
 import java.text.Normalizer;
 import java.util.ArrayList;

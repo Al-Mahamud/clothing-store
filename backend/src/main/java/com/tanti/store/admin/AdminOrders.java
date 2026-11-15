@@ -1,5 +1,6 @@
 package com.tanti.store.admin;
 
+import com.tanti.store.notify.OrderTexts;
 import com.tanti.store.order.OrderService;
 import com.tanti.store.order.OrderService.OrderView;
 import com.tanti.store.order.OrderStock;
@@ -83,7 +84,11 @@ public class AdminOrders {
     private final StoreProperties properties;
     private final Clock clock;
 
-    AdminOrders(JdbcClient jdbc, OrderService orders, OrderStock stock, StoreProperties properties, Clock clock) {
+    private final OrderTexts texts;
+
+    AdminOrders(JdbcClient jdbc, OrderService orders, OrderStock stock, StoreProperties properties, Clock clock,
+                OrderTexts texts) {
+        this.texts = texts;
         this.jdbc = jdbc;
         this.orders = orders;
         this.stock = stock;
@@ -218,9 +223,18 @@ public class AdminOrders {
             if (collected > 0) {
                 notes.add("Cash collected");
             }
+            Instant now = clock.instant();
+            jdbc.sql("update orders set delivered_at = :at where id = :id")
+                    .param("at", Timestamp.from(now)).param("id", id).update();
         }
         event(id, target, notes.isEmpty() ? null : String.join(". ", notes), actor);
-        // Texts to the customer (confirmed, on the way, cancelled) come in phase 7.
+        switch (target) {
+            case "SHIPPED" -> texts.shipped(id);
+            case "CANCELLED" -> texts.cancelled(id, "STAFF");
+            default -> {
+                // Confirming is done by phone, and the rider or courier hands the parcel over: neither is texted.
+            }
+        }
     }
 
     /** Records that a payment was refunded (in the SSLCommerz merchant panel), with its reference. */

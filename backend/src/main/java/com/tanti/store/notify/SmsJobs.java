@@ -12,7 +12,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 class SmsJobs {
 
     private final SmsOutbox outbox;
-
     SmsJobs(SmsOutbox outbox) {
         this.outbox = outbox;
     }

@@ -8,13 +8,15 @@ import type { ProductDetail } from "@/lib/types";
 import { useDeliveryFees } from "@/lib/useDeliveryFees";
 import { taka } from "@/lib/money";
 import { Price } from "@/components/ui/Price";
+import { Stars } from "@/components/ui/Stars";
 import { Gallery } from "./Gallery";
 import { SizeGuide } from "./SizeGuide";
 import { AddToBag } from "./AddToBag";
 
 const LOW_STOCK = 3;
 
-export function ProductView({ product, initialColor }: { product: ProductDetail; initialColor?: string }) {
+/** {@code fitNote}: what most reviewers said about the fit, e.g. "true to size", when enough of them did. */
+export function ProductView({ product, initialColor, fitNote }: { product: ProductDetail; initialColor?: string; fitNote?: string | null }) {
   const fees = useDeliveryFees();
   const startColor = product.colors.find((c) => c.name.toLowerCase() === initialColor?.toLowerCase()) ?? product.colors[0];
   const [colorId, setColorId] = useState(startColor?.id);
@@ -63,6 +65,13 @@ export function ProductView({ product, initialColor }: { product: ProductDetail;
           <div className="mt-3">
             <Price price={product.price} compareAt={product.compareAtPrice} size="lg" />
           </div>
+          {product.rating !== null && product.reviewCount > 0 && (
+            <a href="#reviews" className="group mt-3 inline-flex items-center gap-2 text-sm">
+              <Stars value={product.rating} />
+              <span className="font-medium tabular-nums">{product.rating.toFixed(1)}</span>
+              <span className="text-muted underline-offset-4 group-hover:underline">{product.reviewCount} {product.reviewCount === 1 ? "review" : "reviews"}</span>
+            </a>
+          )}
           <p className="mt-1 text-xs text-muted">Price includes VAT. Delivery calculated at checkout.</p>
 
           {color && (
@@ -102,6 +111,7 @@ export function ProductView({ product, initialColor }: { product: ProductDetail;
                 </legend>
                 {product.sizeChart !== "NONE" && <SizeGuide chart={product.sizeChart} fit={product.fit} />}
               </div>
+              {fitNote && <p className="mt-1.5 text-xs text-muted">Most reviewers say it <a href="#reviews" className="font-medium text-ink underline-offset-4 hover:underline">{fitNote}</a>.</p>}
               <div className={`mt-3 grid grid-cols-5 gap-2 ${sizeError ? "animate-[fade-up_0.3s]" : ""}`}>
                 {color.sizes.map((s) => {
                   const out = s.stock === 0;

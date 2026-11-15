@@ -16,6 +16,11 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: { default: `${site.name} — ${site.tagline}`, template: `%s · ${site.name}` },
   description: site.description,
+  metadataBase: new URL(site.url),
+  applicationName: site.name,
+  alternates: { canonical: "/" },
+  openGraph: { siteName: site.name, locale: "en_BD", type: "website" },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

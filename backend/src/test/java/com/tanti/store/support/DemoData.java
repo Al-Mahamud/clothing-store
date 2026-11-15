@@ -245,6 +245,57 @@ public class DemoData {
 
     static final List<String> DEMO_WISHLIST = List.of("festive-three-piece", "floral-tiered-dress", "wide-leg-palazzo");
 
+    /**
+     * Reviews from other shoppers: product slug, reviewer, rating, headline, words, fit (SMALL, TRUE,
+     * LARGE or null), what they bought, days ago, whether a photo goes with it, and the shop's reply.
+     */
+    static final List<Object[]> REVIEWS = List.of(
+            new Object[] {"oxford-button-down-shirt", "Shakil Ahmed", 5, "My new office shirt",
+                    "Thick, soft oxford that doesn't crease badly by the afternoon. The collar keeps its shape after ten washes.",
+                    "TRUE", "Sky blue · size M", 60, true, "Ten washes in and still crisp: thank you for telling us!"},
+            new Object[] {"oxford-button-down-shirt", "Rumana Islam", 5, "Bought one for my husband",
+                    "He liked it so much I went back for the navy. Buttons are sewn on properly, which is rare.",
+                    "TRUE", "Navy · size L", 21, false, null},
+            new Object[] {"oxford-button-down-shirt", "Habibur Rahman", 4, null,
+                    "Good shirt. A little long in the body for me, I tuck it in. Delivery to Gazipur took three days.",
+                    "LARGE", "White · size M", 35, false, "Thanks Habibur. Gazipur now goes out with our own riders on Tuesdays and Fridays."},
+            new Object[] {"eid-cotton-panjabi", "Imran Kabir", 5, "Wore it on Eid morning",
+                    "Light enough for the heat, and the off-white looks rich, not plain. Got compliments at the mosque.",
+                    "TRUE", "Off-white · size L", 200, true, null},
+            new Object[] {"eid-cotton-panjabi", "Mahfuz Alam", 4, "Runs a bit small",
+                    "Lovely fabric. I'm usually L but needed XL for the shoulders, so order one up if you are broad.",
+                    "SMALL", "Navy · size XL", 190, false, "Thanks Mahfuz, we've added a note to the size guide for broad shoulders."},
+            new Object[] {"block-print-cotton-kurti", "Tasnim Chowdhury", 5, "The print is even nicer in person",
+                    "Soft cotton, colours didn't run in the first wash. Perfect for the university.",
+                    "TRUE", "Teal · size S", 30, true, null},
+            new Object[] {"block-print-cotton-kurti", "Ayesha Siddiqua", 4, null,
+                    "Pretty, but the sleeves are a little short on me. I'm 5'7\".",
+                    "SMALL", "Mustard · size M", 14, false, "Thanks Ayesha. Sleeves are 18 inches on the M; it's now in the description."},
+            new Object[] {"lawn-three-piece-set", "Nabila Karim", 5, "Complete set, beautiful dupatta",
+                    "The dupatta is chiffon, not cheap polyester, and the stitching on the kameez is neat. Fits as the chart says.",
+                    "TRUE", "Lilac · size M", 40, true, null},
+            new Object[] {"festive-three-piece", "Sabrina Akter", 5, "Wedding guest outfit sorted",
+                    "Heavy embroidery but still comfortable for a long evening. Bottle green looks deep and rich.",
+                    "TRUE", "Bottle green · size M", 70, true, null},
+            new Object[] {"heavyweight-crew-tee", "Rashed Khan", 3, "Shrank a little",
+                    "Great weight and no see-through, but it shrank about an inch after a hot wash.",
+                    "SMALL", "Black · size L", 25, false, "Sorry Rashed. Cold wash keeps it true; we'll put that on the care label more clearly."},
+            new Object[] {"heavyweight-crew-tee", "Jannatul Ferdous", 5, null,
+                    "Bought three colours for my brother. He wears them all week.",
+                    "TRUE", "Olive · size M", 50, false, null},
+            new Object[] {"straight-fit-jeans", "Tanvir Hossain", 4, "Proper denim",
+                    "Stiff at first like real denim should be, softens after a few wears. Waist true, legs a little long.",
+                    "TRUE", "Mid denim · size 32", 150, false, null},
+            new Object[] {"wide-leg-palazzo", "Farzana Haque", 5, "So comfortable",
+                    "Flowy and cool, with real pockets. I live in these now.",
+                    "LARGE", "Black · size M", 90, false, null},
+            new Object[] {"kids-hoodie", "Sadia Noor", 5, "Warm and soft",
+                    "My daughter refuses to take it off. Washes well and the hood lining is soft.",
+                    "TRUE", "Dusty rose · size 6-7Y", 45, true, null},
+            new Object[] {"linen-camp-collar-shirt", "Abdul Mannan", 2, "Creases a lot",
+                    "Nice colour but linen creases the moment you sit down. Not for me.",
+                    null, "Rust · size L", 80, false, "Thanks for the honest review, Abdul. Linen does crease; the cotton oxford may suit you better."});
+
     @Bean
     ApplicationRunner demoDataLoader(JdbcClient jdbc, TransactionTemplate tx, StoreProperties properties,
                                      org.springframework.security.crypto.password.PasswordEncoder passwords) {
@@ -333,6 +384,65 @@ public class DemoData {
             jdbc.sql("insert into staff (name, phone, password_hash) values ('Farhana (store manager)', :p, :h)")
                     .param("p", STAFF_PHONE).param("h", passwords.encode(STAFF_PASSWORD)).update();
             demoQueue(now);
+            demoReviews(now);
+            jdbc.sql("""
+                    update orders o set delivered_at = (select max(created_at) from order_events e
+                                                         where e.order_id = o.id and e.status = 'DELIVERED')
+                     where status = 'DELIVERED' and delivered_at is null""").update();
+        }
+
+        private void demoReviews(Instant now) {
+            String hash = passwords.encode("demo-reviewer-" + now.toEpochMilli());
+            int n = 0;
+            for (Object[] r : REVIEWS) {
+                n++;
+                String phone = "0171300" + String.format("%04d", n);
+                long customer = jdbc.sql("""
+                                insert into customers (name, phone, password_hash, phone_verified_at) values (:n, :p, :h, now())
+                                returning id""")
+                        .param("n", r[1]).param("p", phone).param("h", hash).query(Long.class).single();
+                String name = (String) r[1];
+                String author = name.substring(0, name.indexOf(' ')) + " " + name.charAt(name.lastIndexOf(' ') + 1) + ".";
+                Timestamp at = Timestamp.from(now.minus(Duration.ofDays((Integer) r[7])));
+                long review = jdbc.sql("""
+                                insert into reviews (product_id, customer_id, rating, title, body, fit, author, bought, reply,
+                                                     replied_at, replied_by, created_at, updated_at)
+                                select id, :c, :rating, :title, :body, :fit, :author, :bought, :reply, :repliedAt, :repliedBy, :at, :at
+                                  from products where slug = :slug
+                                returning id""")
+                        .param("c", customer).param("rating", r[2]).param("title", r[3]).param("body", r[4])
+                        .param("fit", r[5]).param("author", author).param("bought", r[6]).param("reply", r[9]).param("at", at)
+                        .param("repliedAt", r[9] == null ? null : Timestamp.from(at.toInstant().plus(Duration.ofDays(1))))
+                        .param("repliedBy", r[9] == null ? null : "Farhana (store manager)")
+                        .param("slug", r[0]).query(Long.class).single();
+                if ((Boolean) r[8]) {
+                    // A demo "photo": the product's own picture in the colour that was bought.
+                    jdbc.sql("""
+                                    insert into review_photos (review_id, url)
+                                    select :r, pi.url from product_images pi join products p on p.id = pi.product_id
+                                      left join product_colors pc on pc.id = pi.color_id
+                                     where p.slug = :slug
+                                     order by (pc.name = :color) desc nulls last, pi.position limit 1""")
+                            .param("r", review).param("slug", r[0])
+                            .param("color", ((String) r[6]).substring(0, ((String) r[6]).indexOf(" · "))).update();
+                }
+            }
+            // Nadia reviewed her three-piece; her other delivered pieces wait for a review.
+            jdbc.sql("""
+                            insert into reviews (product_id, customer_id, order_id, rating, title, body, fit, author, bought,
+                                                 created_at, updated_at)
+                            select p.id, c.id, (select o.id from orders o join order_items i on i.order_id = o.id
+                                                 where o.customer_id = c.id and i.product_id = p.id limit 1),
+                                   5, 'Wore it to my cousin''s mehendi',
+                                   'Soft lawn, and the lilac is exactly as in the photos. The dupatta drapes beautifully.',
+                                   'TRUE', 'Nadia R.', 'Lilac · size M', now() - interval '5 days', now() - interval '5 days'
+                              from products p, customers c where p.slug = 'lawn-three-piece-set' and c.phone = :phone""")
+                    .param("phone", DEMO_PHONE).update();
+            jdbc.sql("""
+                    update products p set review_count = s.n, rating = s.avg
+                      from (select product_id, count(*) as n, round(avg(rating)::numeric, 1) as avg
+                              from reviews where status = 'PUBLISHED' group by product_id) s
+                     where s.product_id = p.id""").update();
         }
 
         /**

@@ -1,5 +1,6 @@
 package com.tanti.store.admin;
 
+import com.tanti.store.shared.Pictures;
 import com.tanti.store.shared.ApiException;
 import java.sql.Timestamp;
 import java.time.Instant;

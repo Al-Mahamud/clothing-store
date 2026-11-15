@@ -3,6 +3,7 @@ import type { ProductCard } from "@/lib/types";
 import { percentOff } from "@/lib/money";
 import { Price } from "@/components/ui/Price";
 import { SaveButton } from "@/components/account/SaveButton";
+import { RatingBadge } from "@/components/ui/Stars";
 
 /* eslint-disable @next/next/no-img-element -- product images are served by the backend as-is. */
 export function ProductCardView({ product, priority = false }: { product: ProductCard; priority?: boolean }) {
@@ -43,7 +44,10 @@ export function ProductCardView({ product, priority = false }: { product: Produc
           <h3 className="text-sm leading-snug text-ink decoration-1 underline-offset-4 group-hover:underline">
             {product.name}
           </h3>
-          <Price price={product.price} compareAt={product.compareAtPrice} />
+          <div className="flex items-center justify-between gap-2">
+            <Price price={product.price} compareAt={product.compareAtPrice} />
+            <RatingBadge rating={product.rating} count={product.reviewCount} />
+          </div>
         </div>
       </Link>
       {product.colors.length > 1 && (

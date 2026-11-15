@@ -12,6 +12,9 @@ export type ProductCard = {
   colors: Swatch[];
   isNew: boolean;
   soldOut: boolean;
+  /** Average of published reviews, or null when there are none. */
+  rating: number | null;
+  reviewCount: number;
 };
 
 export type CategoryNode = {
@@ -59,6 +62,8 @@ export type ProductDetail = {
   compareAtPrice: number | null;
   isNew: boolean;
   colors: ColorOption[];
+  rating: number | null;
+  reviewCount: number;
 };
 
 export type Collection = {
@@ -142,6 +147,8 @@ export type OrderView = {
   /** Set when the order is shipped with a courier. */
   courier: string | null;
   trackingCode: string | null;
+  /** Care texts after delivery (the shopper can turn them off). */
+  deliveredAt: string | null;
 };
 
 export type PaymentOptions = { online: boolean; holdMinutes: number };
@@ -164,3 +171,49 @@ export type SavedAddress = {
 export type OrderSummary = { number: string; status: OrderView["status"]; placedAt: string; itemCount: number; lineCount: number; total: number; images: string[] };
 export type OrderHistory = { items: OrderSummary[]; page: number; pageSize: number; total: number };
 export type Reordered = { added: number; unavailable: string[]; cart: Cart };
+
+export type ReviewPhoto = { id: number; url: string };
+
+/** How a reviewer said it fitted. */
+export type Fit = "SMALL" | "TRUE" | "LARGE";
+
+export type Review = {
+  id: number;
+  rating: number;
+  title: string | null;
+  body: string;
+  fit: Fit | null;
+  author: string;
+  bought: string | null;
+  photos: ReviewPhoto[];
+  reply: string | null;
+  repliedAt: string | null;
+  createdAt: string;
+  edited: boolean;
+};
+
+/** `stars`: how many reviews gave 5, 4, 3, 2 and 1 stars. */
+export type ReviewSummary = { average: number | null; count: number; stars: number[]; withPhotos: number; fit: { small: number; trueToSize: number; large: number } };
+export type ReviewSort = "RECENT" | "HIGHEST" | "LOWEST" | "PHOTOS";
+export type ReviewPage = { summary: ReviewSummary; items: Review[]; page: number; pageSize: number; total: number };
+
+export type MyReview = {
+  id: number;
+  slug: string;
+  product: string;
+  image: string | null;
+  rating: number;
+  title: string | null;
+  body: string;
+  fit: Fit | null;
+  bought: string | null;
+  photos: ReviewPhoto[];
+  status: "PUBLISHED" | "HIDDEN";
+  reply: string | null;
+  createdAt: string;
+};
+export type ToReview = { slug: string; product: string; image: string | null; bought: string | null; deliveredAt: string | null };
+export type AccountReviews = { toReview: ToReview[]; mine: MyReview[] };
+export type ReviewForProduct = { canReview: boolean; review: MyReview | null };
+
+export type Sitemap = { categories: string[]; collections: string[]; products: { slug: string; updatedAt: string }[] };

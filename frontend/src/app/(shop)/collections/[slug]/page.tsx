@@ -8,7 +8,12 @@ type Props = { params: Promise<{ slug: string }>; searchParams: Promise<SearchPa
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const collection = await api.collection(slug);
-  return { title: collection.name, description: collection.description ?? undefined };
+  return {
+    title: collection.name,
+    description: collection.description ?? undefined,
+    alternates: { canonical: `/collections/${collection.slug}` },
+    openGraph: collection.image ? { images: [collection.image] } : undefined,
+  };
 }
 
 /* eslint-disable @next/next/no-img-element */

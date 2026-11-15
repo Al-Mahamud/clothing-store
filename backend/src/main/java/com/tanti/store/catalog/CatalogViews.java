@@ -22,7 +22,10 @@ public final class CatalogViews {
             String hoverImage,
             List<Swatch> colors,
             boolean isNew,
-            boolean soldOut) {
+            boolean soldOut,
+            /* Average of published reviews (null without any), and how many there are. */
+            Double rating,
+            int reviewCount) {
     }
 
     public record CategoryNode(
@@ -78,7 +81,9 @@ public final class CatalogViews {
             int price,
             Integer compareAtPrice,
             boolean isNew,
-            List<ColorOption> colors) {
+            List<ColorOption> colors,
+            Double rating,
+            int reviewCount) {
     }
 
     public record CollectionView(

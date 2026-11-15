@@ -209,7 +209,7 @@ Each phase ends with passing tests, a commit and a short note of what changed.
 | 4 | Accounts | register/sign in, cart merge, addresses, order history, wishlist | done |
 | 5 | Online payment | SSLCommerz with fake local gateway, payment expiry job | done |
 | 6 | Admin | dashboard, products editor with images, orders, categories, collections, coupons, customers | done |
-| 7 | Reviews, notifications, SEO | reviews, order emails/SMS, metadata, sitemap, Open Graph images | |
+| 7 | Reviews, notifications, SEO | reviews, order emails/SMS, metadata, sitemap, Open Graph images | done |
 | 8 | Launch readiness | Docker, Caddy, backups, CI, real payment credentials, content pages | |
 
 ### Notes from building
@@ -220,7 +220,6 @@ Each phase ends with passing tests, a commit and a short note of what changed.
   number plus the phone number used.
 - The home page is built at `next build` time and refreshed every 30 s, so the backend must be
   reachable during a production build (phase 8 deals with this in the deploy setup).
-- Footer links to `/pages/*` lead nowhere until phase 7.
 
 ### Notes from phase 4 (accounts)
 
@@ -290,3 +289,27 @@ Each phase ends with passing tests, a commit and a short note of what changed.
   order on the home page, hidden or shown). Web addresses are fixed when made.
 - **Delivery fees** are set in the admin and stored in the database; the shop, bag and checkout read
   them from `GET /api/v1/delivery`. Until they are saved, the fees in `application.yml` apply.
+
+### Notes from phase 7 (reviews, texts, information pages, SEO)
+
+- Ported from the tree shop's phase 7 without its plant-only parts (care texts, planting guides).
+- **Reviews**: only customers whose order was delivered can review a product, once (and change or
+  delete it later), with up to 3 photos. A review shows "Nadia R.", "Verified buyer" and the colour
+  and size bought. Staff see every review in the admin with the reviewer's number and order, and can
+  hide one or reply. Each product keeps its average and count, shown on cards and the product page.
+- **How it fits**: a review can say the piece runs small, is true to size or runs large. The product
+  page shows a "How it fits" scale, each review shows its answer, and once two or more reviewers have
+  answered, the size picker says what most of them said ("Most reviewers say it runs small"). The
+  admin marks off-size answers in clay, which is a hint to check the size chart.
+- **Texts** (through the phase 4 outbox, plain English and "Tk" so each fits one SMS): order received
+  (cash orders, paid online orders, or switched to cash), sent out (with the courier and tracking
+  number) and cancelled (by the shop, or unpaid in time). Confirming and delivering are not texted.
+  Email is still not sent: customers get texts only.
+- **Information pages** at `/pages/*`, linked from the footer: our story, delivery & returns (live
+  fees, the 7-day exchange), size guide (every chart in `config/sizeCharts.ts`), questions & answers,
+  contact, privacy and terms (`config/pages.ts`). They are drafts: the owner must check every promise,
+  and have Terms and Privacy read by a lawyer.
+- **SEO**: page titles and descriptions, canonical addresses, `robots.txt`, `sitemap.xml` (categories,
+  collections, products and pages), structured data (store, website search, product with rating and
+  reviews, breadcrumbs), a share image (`/opengraph-image`) and the site icon. The public address
+  comes from `NEXT_PUBLIC_SITE_URL`.

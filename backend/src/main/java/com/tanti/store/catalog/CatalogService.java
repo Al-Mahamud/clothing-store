@@ -107,20 +107,21 @@ public class CatalogService {
 
     private record ProductRow(long id, String slug, String name, long categoryId, String description, String details,
                               String fabric, String care, String fit, String sizeChart, int price,
-                              Integer compareAtPrice, Instant createdAt) {
+                              Integer compareAtPrice, Instant createdAt, Double rating, int reviewCount) {
     }
 
     public ProductDetail product(String slug) {
         ProductRow p = jdbc.sql("""
                         select id, slug, name, category_id, description, details, fabric, care, fit, size_chart,
-                               price, compare_at_price, created_at
+                               price, compare_at_price, created_at, rating, review_count
                           from products where slug = :slug and status = 'ACTIVE'
                         """)
                 .param("slug", slug)
                 .query((rs, n) -> new ProductRow(rs.getLong(1), rs.getString(2), rs.getString(3), rs.getLong(4),
                         rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9),
                         rs.getString(10), rs.getInt(11), (Integer) rs.getObject(12),
-                        rs.getTimestamp(13).toInstant()))
+                        rs.getTimestamp(13).toInstant(),
+                        rs.getBigDecimal(14) == null ? null : rs.getBigDecimal(14).doubleValue(), rs.getInt(15)))
                 .optional()
                 .orElseThrow(() -> ApiException.notFound("product"));
 
@@ -160,7 +161,29 @@ public class CatalogService {
                 .toList();
         return new ProductDetail(p.id(), p.slug(), p.name(), breadcrumb(p.categoryId()), p.description(), details,
                 p.fabric(), p.care(), p.fit(), p.sizeChart(), p.price(), p.compareAtPrice(),
-                p.createdAt().isAfter(Instant.now().minus(ProductSearch.NEW_FOR)), colors);
+                p.createdAt().isAfter(Instant.now().minus(ProductSearch.NEW_FOR)), colors, p.rating(), p.reviewCount());
+    }
+
+    public record SitemapEntry(String slug, Instant updatedAt) {
+    }
+
+    public record Sitemap(List<String> categories, List<String> collections, List<SitemapEntry> products) {
+    }
+
+    public Sitemap sitemap() {
+        List<String> categories = jdbc.sql("""
+                        select slug from categories c
+                         where exists (select 1 from products p where p.status = 'ACTIVE'
+                                        and (p.category_id = c.id or p.category_id in (select id from categories where parent_id = c.id)))
+                         order by parent_id nulls first, position""")
+                .query(String.class).list();
+        List<String> collections = jdbc.sql("select slug from collections where active order by position").query(String.class).list();
+        // A new review changes the page too.
+        List<SitemapEntry> products = jdbc.sql("""
+                        select p.slug, greatest(p.updated_at, (select max(updated_at) from reviews r where r.product_id = p.id))
+                          from products p where p.status = 'ACTIVE' order by p.id""")
+                .query((rs, n) -> new SitemapEntry(rs.getString(1), rs.getTimestamp(2).toInstant())).list();
+        return new Sitemap(categories, collections, products);
     }
 
     private List<CategoryRef> breadcrumb(long categoryId) {

@@ -5,6 +5,8 @@ import type { Collection, DeliveryFees } from "@/lib/types";
 import { ProductRail } from "@/components/shop/ProductRail";
 import { ProductGrid } from "@/components/shop/ProductGrid";
 import { SectionHeading } from "@/components/shop/SectionHeading";
+import { JsonLd } from "@/lib/jsonld";
+import { site } from "@/config/site";
 
 /* eslint-disable @next/next/no-img-element */
 export default async function HomePage() {
@@ -58,6 +60,27 @@ export default async function HomePage() {
       </section>
 
       <Promises fees={fees} />
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@type": "ClothingStore",
+        name: site.name,
+        description: site.description,
+        url: site.url,
+        logo: `${site.url}/icon.svg`,
+        telephone: site.phone,
+        email: site.email,
+        address: { "@type": "PostalAddress", streetAddress: site.address, addressCountry: "BD" },
+        areaServed: { "@type": "Country", name: "Bangladesh" },
+        currenciesAccepted: "BDT",
+        paymentAccepted: "Cash, bKash, Nagad, Credit Card",
+      }} />
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: site.name,
+        url: site.url,
+        potentialAction: { "@type": "SearchAction", target: `${site.url}/search?q={search_term_string}`, "query-input": "required name=search_term_string" },
+      }} />
 
       {editorials[1] && <Editorial collection={editorials[1]} reverse />}
     </>

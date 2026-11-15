@@ -9,7 +9,12 @@ type Props = { params: Promise<{ slug: string }>; searchParams: Promise<SearchPa
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const category = await api.category(slug);
-  return { title: category.name, description: category.description ?? undefined };
+  return {
+    title: category.name,
+    description: category.description ?? undefined,
+    alternates: { canonical: `/c/${category.slug}` },
+    openGraph: category.image ? { images: [category.image] } : undefined,
+  };
 }
 
 export default async function CategoryPage({ params, searchParams }: Props) {
