@@ -210,7 +210,7 @@ Each phase ends with passing tests, a commit and a short note of what changed.
 | 5 | Online payment | SSLCommerz with fake local gateway, payment expiry job | done |
 | 6 | Admin | dashboard, products editor with images, orders, categories, collections, coupons, customers | done |
 | 7 | Reviews, notifications, SEO | reviews, order emails/SMS, metadata, sitemap, Open Graph images | done |
-| 8 | Launch readiness | Docker, Caddy, backups, CI, real payment credentials, content pages | |
+| 8 | Launch readiness | Docker, Caddy, backups, CI, real payment credentials, content pages | done |
 
 ### Notes from building
 
@@ -313,3 +313,27 @@ Each phase ends with passing tests, a commit and a short note of what changed.
   collections, products and pages), structured data (store, website search, product with rating and
   reviews, breadcrumbs), a share image (`/opengraph-image`) and the site icon. The public address
   comes from `NEXT_PUBLIC_SITE_URL`.
+
+### Notes from phase 8 (launch readiness)
+
+- Ported from the tree shop's launch kit (itself from Haat's). `docs/DEPLOY.md` is the step-by-step
+  guide: one Linux server with Docker running PostgreSQL, the API, the website and Caddy, which gets
+  the HTTPS certificate and is the only part reachable from the internet (`deploy/compose.yaml`).
+- The API refuses to start in production with unsafe settings (an `http://` address, texts that only
+  go to the log, an empty database password) and says which one to fix (`shared/ProductionChecks`).
+  `STAGING=true` marks a test server, where log-only texts are allowed.
+- `scripts/backup.sh` saves the database and the uploaded pictures, checks the dump is readable, keeps
+  14 days and can copy to an rclone remote; `scripts/restore.sh` brings a backup back.
+- GitHub Actions: tests and a website build on every push (`ci.yml`); a weekly **Deploy drill** that
+  builds the whole stack on a throwaway machine, checks it over HTTPS, signs in as staff, and backs
+  up, wipes and restores it (`deploy-drill.yml`); weekly Dependabot proposals, without major Java,
+  Node, TypeScript or ESLint jumps.
+- **A new shop starts usable**: the usual men's, women's and kids' categories are added when there
+  are none (`catalog/StarterCatalog`; the demo data now builds on them). The home page hides empty
+  sections and shows a welcome block until the first collection exists; the header shows a
+  collection only once there is one; an empty category says new pieces are on their way.
+- Shop pages now render when visited rather than at build time, so the website builds without the
+  API (as in Docker and CI). Catalog reads are still cached for their revalidate time.
+- Not done: Docker could not run on the machine this was built on, so the images and compose file are
+  first proven by the Deploy drill on GitHub. SSL Wireless and SSLCommerz need real accounts. Email is
+  not sent (texts only); refunds are recorded by hand; one server, no failover.

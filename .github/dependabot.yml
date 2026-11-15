@@ -1,0 +1,36 @@
+# Weekly update proposals; each one runs CI before anyone merges it.
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule: { interval: weekly }
+    groups:
+      minor-and-patch: { update-types: [minor, patch] }
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: { interval: weekly }
+    groups:
+      minor-and-patch: { update-types: [minor, patch] }
+    ignore:
+      # Node's types follow the Node version the shop runs on (22), not the newest Node.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+      # Next's lint setup supports ESLint 9 and TypeScript 5 only (Nov 2026): typescript-eslint
+      # refuses TypeScript 7, and the import, jsx-a11y and react plugins stop at ESLint 9.
+      # Remove these when eslint-config-next supports the new versions.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+  - package-ecosystem: docker
+    directories: [/backend, /frontend]
+    schedule: { interval: weekly }
+    # The project is built for Java 17 and Node 22 (long-term support); moving up is a decision, not an update.
+    ignore:
+      - dependency-name: eclipse-temurin
+        update-types: [version-update:semver-major]
+      - dependency-name: node
+        update-types: [version-update:semver-major]

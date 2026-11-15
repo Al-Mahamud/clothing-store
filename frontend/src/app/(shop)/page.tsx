@@ -12,52 +12,60 @@ import { site } from "@/config/site";
 export default async function HomePage() {
   const [home, fees] = await Promise.all([api.home(), api.delivery()]);
   const [hero, ...editorials] = home.collections;
+  // A new shop: only categories with something in them, and no empty sections.
+  const categories = home.categories.filter((c) => c.productCount > 0);
 
   return (
     <>
-      {hero && <Hero collection={hero} />}
+      {hero ? <Hero collection={hero} /> : <Welcome hasProducts={categories.length > 0} />}
 
-      <section className="container-page pt-20 md:pt-28" aria-labelledby="shop-by">
-        <SectionHeading eyebrow="Shop by" title="Find your fit" />
-        <h2 id="shop-by" className="sr-only">Shop by category</h2>
-        <div className="grid gap-3 sm:grid-cols-3 md:gap-5">
-          {home.categories.map((category, i) => (
-            <Link
-              key={category.id}
-              href={`/c/${category.slug}`}
-              className="group relative block overflow-hidden bg-sand animate-fade-up"
-              style={{ animationDelay: `${i * 80}ms` }}
-            >
-              <div className="aspect-[4/5]">
-                {category.image && (
-                  <img src={category.image} alt="" className="h-full w-full object-cover transition duration-[1.2s] ease-out-soft group-hover:scale-105" />
-                )}
-              </div>
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-ink/55 via-ink/15 to-transparent p-5 pt-24 text-paper md:p-7">
-                <div>
-                  <p className="font-display text-3xl font-light md:text-4xl">{category.name}</p>
-                  <p className="mt-1 text-xs text-paper/80">{category.productCount} styles</p>
+      {categories.length > 0 && (
+        <section className="container-page pt-20 md:pt-28" aria-labelledby="shop-by">
+          <SectionHeading eyebrow="Shop by" title="Find your fit" />
+          <h2 id="shop-by" className="sr-only">Shop by category</h2>
+          <div className="grid gap-3 sm:grid-cols-3 md:gap-5">
+            {categories.map((category, i) => (
+              <Link
+                key={category.id}
+                href={`/c/${category.slug}`}
+                className="group relative block overflow-hidden bg-sand animate-fade-up"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <div className="aspect-[4/5]">
+                  {category.image && (
+                    <img src={category.image} alt="" className="h-full w-full object-cover transition duration-[1.2s] ease-out-soft group-hover:scale-105" />
+                  )}
                 </div>
-                <span className="grid h-11 w-11 place-items-center rounded-full bg-paper text-ink transition group-hover:bg-clay group-hover:text-paper">
-                  <ArrowRight size={18} />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-ink/55 via-ink/15 to-transparent p-5 pt-24 text-paper md:p-7">
+                  <div>
+                    <p className="font-display text-3xl font-light md:text-4xl">{category.name}</p>
+                    <p className="mt-1 text-xs text-paper/80">{category.productCount} styles</p>
+                  </div>
+                  <span className="grid h-11 w-11 place-items-center rounded-full bg-paper text-ink transition group-hover:bg-clay group-hover:text-paper">
+                    <ArrowRight size={18} />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <section className="container-page pt-20 md:pt-28">
-        <SectionHeading eyebrow="Just landed" title="New arrivals" href="/shop?sort=newest" />
-        <ProductRail products={home.newArrivals} />
-      </section>
+      {home.newArrivals.length > 0 && (
+        <section className="container-page pt-20 md:pt-28">
+          <SectionHeading eyebrow="Just landed" title="New arrivals" href="/shop?sort=newest" />
+          <ProductRail products={home.newArrivals} />
+        </section>
+      )}
 
       {editorials[0] && <Editorial collection={editorials[0]} />}
 
-      <section className="container-page pt-20 md:pt-28">
-        <SectionHeading eyebrow="Most loved" title="Best sellers" href="/shop?sort=popular" />
-        <ProductGrid products={home.bestSellers} eager={0} />
-      </section>
+      {home.bestSellers.length > 0 && (
+        <section className="container-page pt-20 md:pt-28">
+          <SectionHeading eyebrow="Most loved" title="Best sellers" href="/shop?sort=popular" />
+          <ProductGrid products={home.bestSellers} eager={0} />
+        </section>
+      )}
 
       <Promises fees={fees} />
       <JsonLd data={{
@@ -84,6 +92,26 @@ export default async function HomePage() {
 
       {editorials[1] && <Editorial collection={editorials[1]} reverse />}
     </>
+  );
+}
+
+/** The top of the home page before the shop has made its first collection. */
+function Welcome({ hasProducts }: { hasProducts: boolean }) {
+  return (
+    <section className="border-b border-line bg-sand">
+      <div className="container-page max-w-4xl animate-fade-up py-20 text-center md:py-28">
+        <p className="eyebrow text-clay">{site.name} · তাঁতি</p>
+        <h1 className="mt-5 font-display text-5xl font-light leading-[1.02] tracking-tight md:text-7xl">{site.tagline}</h1>
+        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-ink-soft">
+          {hasProducts ? site.description : "Our first pieces are on their way. Cash on delivery across Bangladesh when we open."}
+        </p>
+        {hasProducts && (
+          <Link href="/shop" className="group mt-9 inline-flex items-center gap-3 bg-ink px-7 py-4 text-sm font-medium text-paper transition hover:bg-clay">
+            Shop all <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+          </Link>
+        )}
+      </div>
+    </section>
   );
 }
 

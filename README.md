@@ -3,6 +3,8 @@
 A single-brand clothing shop for Bangladesh: storefront, checkout and admin.
 See [docs/PLAN.md](docs/PLAN.md) for the full frontend and backend plan and the delivery phases.
 
+Putting the shop online (Docker, HTTPS, backups, CI): see `docs/DEPLOY.md`.
+
 ## Layout
 
 ```text

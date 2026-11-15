@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
+import { connection } from "next/server";
 import { api } from "@/lib/api";
 import { site } from "@/config/site";
 import { pageSlugs } from "@/config/pages";
 
-export const revalidate = 3600;
-
 /** Every page worth finding: home, the shop, categories, collections, products and information pages. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Built when asked for, not at build time (no shop API then); the product list is cached for an hour.
+  await connection();
   const data = await api.sitemap().catch(() => ({ categories: [], collections: [], products: [] }));
   return [
     { url: site.url, changeFrequency: "daily", priority: 1 },

@@ -302,6 +302,7 @@ public class DemoData {
         return new Loader(jdbc, tx, properties.storageRoot().resolve("demo"), passwords);
     }
 
+    @org.springframework.core.annotation.Order(1)
     static final class Loader implements ApplicationRunner {
 
         private final JdbcClient jdbc;
@@ -329,20 +330,10 @@ public class DemoData {
         }
 
         private void load() {
-            category(null, "Men", "men", "Panjabis, shirts and everyday basics.", 0);
-            category("men", "Panjabi", "men-panjabi", "Festive and everyday panjabis.", 0);
-            category("men", "Shirts", "men-shirts", "Oxford, linen and poplin shirts.", 1);
-            category("men", "T-shirts & Polos", "men-tshirts", "Tees, polos and hoodies.", 2);
-            category("men", "Trousers & Jeans", "men-trousers", "Chinos and denim.", 3);
-            category(null, "Women", "women", "Kurtis, three-pieces and dresses.", 1);
-            category("women", "Kurtis", "women-kurtis", "Printed, plain and embroidered kurtis.", 0);
-            category("women", "Three-Piece", "women-three-piece", "Complete sets with dupatta.", 1);
-            category("women", "Dresses", "women-dresses", "Midi and maxi dresses.", 2);
-            category("women", "Tops & Shirts", "women-tops", "Tees and shirts.", 3);
-            category("women", "Bottoms", "women-bottoms", "Palazzos and jeans.", 4);
-            category(null, "Kids", "kids", "Comfortable clothes for play and festivals.", 2);
-            category("kids", "Boys", "kids-boys", "Tees, panjabis and joggers.", 0);
-            category("kids", "Girls", "kids-girls", "Frocks and hoodies.", 1);
+            // The categories come from the starter data (StarterCatalog runs first).
+            jdbc.sql("select id, slug from categories").query(rs -> {
+                categories.put(rs.getString(2), rs.getLong(1));
+            });
 
             collection("Eid Edit", "eid-edit", "Dressed for the celebration",
                     "Panjabis, three-pieces and matching kids' sets for the most festive days of the year.", 0,
@@ -582,17 +573,6 @@ public class DemoData {
                     .param("max", maxDiscount).param("min", minSubtotal)
                     .param("ends", endsAt == null ? null : Timestamp.from(endsAt))
                     .update();
-        }
-
-        private void category(String parent, String name, String slug, String description, int position) {
-            long id = jdbc.sql("""
-                            insert into categories (parent_id, name, slug, description, position)
-                            values (:parent, :name, :slug, :description, :position) returning id""")
-                    .param("parent", parent == null ? null : categories.get(parent))
-                    .param("name", name).param("slug", slug).param("description", description)
-                    .param("position", position)
-                    .query(Long.class).single();
-            categories.put(slug, id);
         }
 
         private void collection(String name, String slug, String tagline, String description, int position,

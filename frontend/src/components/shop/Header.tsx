@@ -70,11 +70,13 @@ export async function Header() {
                     </div>
                   </li>
                 ))}
-                <li>
-                  <Link href={collections[0] ? `/collections/${collections[0].slug}` : "/shop"} className="inline-flex h-[4.5rem] items-center px-3 text-sm font-medium hover:text-clay">
-                    {collections[0]?.name ?? "Collections"}
-                  </Link>
-                </li>
+                {collections[0] && (
+                  <li>
+                    <Link href={`/collections/${collections[0].slug}`} className="inline-flex h-[4.5rem] items-center px-3 text-sm font-medium hover:text-clay">
+                      {collections[0].name}
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <Link href="/shop?sale=true" className="inline-flex h-[4.5rem] items-center px-3 text-sm font-medium text-sale">
                     Sale

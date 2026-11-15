@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { productQuery, type SearchParams } from "@/lib/listing";
+import { FILTER_KEYS, productQuery, type SearchParams } from "@/lib/listing";
 import { FilterPanel, MobileFilters, SortSelect, ActiveFilters } from "./Filters";
 import { LoadMoreGrid } from "./LoadMoreGrid";
 
@@ -28,6 +28,7 @@ export async function Listing({
 }) {
   const query = productQuery(scope, searchParams);
   const page = await api.products(query);
+  const filtered = FILTER_KEYS.some((k) => k !== "sort" && query.has(k));
   return (
     <div className="container-page">
       <nav aria-label="Breadcrumb" className="pt-6 text-xs text-muted">
@@ -89,8 +90,8 @@ export async function Listing({
           <ActiveFilters facets={page.facets} />
           {page.items.length === 0 ? (
             <div className="grid place-items-center border border-dashed border-line px-6 py-24 text-center">
-              <p className="font-display text-2xl font-light">Nothing matches those filters</p>
-              <p className="mt-2 text-sm text-muted">Try removing a size or colour, or widen the price range.</p>
+              <p className="font-display text-2xl font-light">{filtered ? "Nothing matches those filters" : "New pieces are on their way"}</p>
+              <p className="mt-2 text-sm text-muted">{filtered ? "Try removing a size or colour, or widen the price range." : "Nothing here yet. Have a look at the rest of the shop in the meantime."}</p>
             </div>
           ) : (
             <LoadMoreGrid key={query.toString()} initial={page} query={query.toString()} />
