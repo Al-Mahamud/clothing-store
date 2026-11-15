@@ -207,7 +207,7 @@ Each phase ends with passing tests, a commit and a short note of what changed.
 | 2 | Storefront | design system, header/footer, home, listing with filters, product page | done |
 | 3 | Cart and checkout | cart API and drawer, coupons, delivery fee, COD orders, thank-you page, tracking | done |
 | 4 | Accounts | register/sign in, cart merge, addresses, order history, wishlist | done |
-| 5 | Online payment | SSLCommerz with fake local gateway, payment expiry job | |
+| 5 | Online payment | SSLCommerz with fake local gateway, payment expiry job | done |
 | 6 | Admin | dashboard, products editor with images, orders, categories, collections, coupons, customers | |
 | 7 | Reviews, notifications, SEO | reviews, order emails/SMS, metadata, sitemap, Open Graph images | |
 | 8 | Launch readiness | Docker, Caddy, backups, CI, real payment credentials, content pages | |
@@ -245,3 +245,19 @@ Each phase ends with passing tests, a commit and a short note of what changed.
   something is in it.
 - **Wishlist**: a heart on every product card (beside the card link, not inside it) and on the
   product page. Signed-out shoppers are sent to sign in. The header shows how many are saved.
+
+### Notes from phase 5 (online payment)
+
+- Ported from the tree shop's payment code (itself from Haat's tested version). An online order waits
+  as PENDING_PAYMENT and holds its stock for 30 minutes (`store.payment.expiry`) while the shopper
+  pays on SSLCommerz (bKash, Nagad, Rocket, cards).
+- A payment counts only when SSLCommerz's Validation API confirms the `val_id` for the same
+  `tran_id`, in BDT, for the exact amount; the IPN, the browser's return and a check every minute
+  can each report it, and confirming twice changes nothing. Every callback is stored.
+- After a failed or cancelled payment the order page offers "Pay now" again (up to 5 tries) or
+  "Pay cash on delivery instead". Unpaid orders are cancelled after 30 minutes and the pieces go back
+  into stock; money that arrives later is recorded for a refund.
+- Settings: `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWORD`, `SSLCOMMERZ_BASE_URL`, `WEB_URL`.
+  Online payment is hidden until the credentials are set. Local runs use a fake gateway from the
+  test sources ("TEST GATEWAY · NOT REAL MONEY").
+- Order texts (confirmed, on the way, cancelled) are left for phase 7.

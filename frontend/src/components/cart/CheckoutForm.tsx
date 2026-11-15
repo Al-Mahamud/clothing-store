@@ -7,7 +7,7 @@ import { Banknote, Check, CreditCard, Lock, Plus } from "lucide-react";
 import { ApiError, request } from "@/lib/client";
 import { taka } from "@/lib/money";
 import { site } from "@/config/site";
-import type { Quote, SavedAddress, Zone } from "@/lib/types";
+import type { PaymentOptions, Quote, SavedAddress, Zone } from "@/lib/types";
 import { useAccount } from "@/components/account/AccountProvider";
 import { Field } from "@/components/ui/Field";
 import { useCart } from "./CartProvider";
@@ -40,6 +40,10 @@ export function CheckoutForm() {
   const [saved, setSaved] = useState<SavedAddress[]>([]);
   const [chosen, setChosen] = useState<number | "new">("new");
   const [saveAddress, setSaveAddress] = useState(true);
+  const [payOptions, setPayOptions] = useState<PaymentOptions | null>(null);
+  useEffect(() => {
+    request<PaymentOptions>("GET", "/payments/options").then(setPayOptions).catch(() => setPayOptions(null));
+  }, []);
 
   // Signed in: start from the default saved address, or at least the customer's name and number.
   useEffect(() => {
@@ -241,14 +245,17 @@ export function CheckoutForm() {
                 <span className="block text-xs text-muted">Pay the rider in cash when your parcel arrives.</span>
               </span>
             </label>
-            <label className="flex cursor-not-allowed items-center gap-4 border border-line p-4 opacity-60">
-              <input type="radio" name="payment" disabled className="accent-ink" />
-              <CreditCard size={22} strokeWidth={1.4} />
+            <label className={`flex items-center gap-4 border p-4 ${!payOptions?.online ? "cursor-not-allowed border-line opacity-60" : form.paymentMethod === "ONLINE" ? "cursor-pointer border-ink bg-white/70" : "cursor-pointer border-line"}`}>
+              <input type="radio" name="payment" disabled={!payOptions?.online} checked={form.paymentMethod === "ONLINE"} onChange={() => set("paymentMethod", "ONLINE")} className="accent-ink" />
+              <CreditCard size={22} strokeWidth={1.4} className={payOptions?.online ? "text-clay" : ""} />
               <span className="flex-1">
                 <span className="block text-sm font-medium">Card, bKash or Nagad</span>
-                <span className="block text-xs text-muted">Online payment is coming soon.</span>
+                <span className="block text-xs text-muted">{payOptions?.online ? "Pay now on the secure SSLCommerz page." : "Not available right now."}</span>
               </span>
             </label>
+            {form.paymentMethod === "ONLINE" && payOptions && (
+              <p className="border-l-2 border-ink bg-sand/60 px-4 py-3 text-xs text-ink-soft">After you place the order you&rsquo;ll pay on SSLCommerz. Your pieces are set aside for {payOptions.holdMinutes} minutes; if the payment doesn&rsquo;t go through you can try again or switch to cash.</p>
+            )}
           </div>
         </Step>
       </div>
@@ -292,7 +299,7 @@ export function CheckoutForm() {
             className="mt-6 flex w-full items-center justify-center gap-2 bg-ink py-4 text-sm font-medium text-paper transition hover:bg-clay disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Lock size={15} />
-            {placing ? "Placing your order…" : `Place order${quote ? ` · ${taka(quote.total)}` : ""}`}
+            {placing ? (form.paymentMethod === "ONLINE" ? "Opening payment…" : "Placing your order…") : `${form.paymentMethod === "ONLINE" ? "Place order & pay" : "Place order"}${quote ? ` · ${taka(quote.total)}` : ""}`}
           </button>
           <p className="mt-3 text-center text-xs text-muted">
             By placing your order you agree to our <Link href="/pages/terms" className="underline">terms</Link>.
