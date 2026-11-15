@@ -206,7 +206,7 @@ Each phase ends with passing tests, a commit and a short note of what changed.
 | 1 | Catalog backend | schema, catalog API with filters and facets, home endpoint, demo data, tests | done |
 | 2 | Storefront | design system, header/footer, home, listing with filters, product page | done |
 | 3 | Cart and checkout | cart API and drawer, coupons, delivery fee, COD orders, thank-you page, tracking | done |
-| 4 | Accounts | register/sign in, cart merge, addresses, order history, wishlist | |
+| 4 | Accounts | register/sign in, cart merge, addresses, order history, wishlist | done |
 | 5 | Online payment | SSLCommerz with fake local gateway, payment expiry job | |
 | 6 | Admin | dashboard, products editor with images, orders, categories, collections, coupons, customers | |
 | 7 | Reviews, notifications, SEO | reviews, order emails/SMS, metadata, sitemap, Open Graph images | |
@@ -220,4 +220,28 @@ Each phase ends with passing tests, a commit and a short note of what changed.
   number plus the phone number used.
 - The home page is built at `next build` time and refreshed every 30 s, so the backend must be
   reachable during a production build (phase 8 deals with this in the deploy setup).
-- Footer links to `/pages/*` and the header account and wishlist icons lead nowhere until phases 4 and 7.
+- Footer links to `/pages/*` lead nowhere until phase 7.
+
+### Notes from phase 4 (accounts)
+
+- Ported from the tree shop's (Shobuj's) account code, adapted to colour × size and restyled in
+  Tanti's look. **Sign-in is by mobile number and password, not email** (a change from section 2:
+  almost every shopper here has a mobile number, and texts are how orders get confirmed). Passwords
+  use BCrypt; sessions live in PostgreSQL and the session id changes at sign-in; 6 wrong passwords
+  for a number in 15 minutes pause sign-in.
+- **Sign-up needs a 6-digit code texted to the number**, so numbers are proven from the start.
+  Codes last 10 minutes, allow 5 tries, one per minute and 5 per hour per number. Because the number
+  is proven, earlier guest orders placed with it join the new account. "Forgot password" uses the
+  same codes and signs out other devices. Texts go through an outbox in the database;
+  `SMS_DRIVER=log` (the default) only logs them, and local runs show them at
+  http://localhost:8080/api/v1/test-texts. The SSL Wireless sender is included but unverified
+  (phase 7 adds order texts on top of it).
+- One bag per customer, shared across devices; at sign-in the guest bag joins it (larger quantity
+  wins, at most 10 per line; a coupon carries over). Signing out leaves the bag with the account.
+- Saved addresses (up to 10, one default) with inside/outside Dhaka for the delivery fee. Checkout
+  picks the default and can save a new one.
+- Order history with **Order again**: each piece goes back in the bag in the same colour and size,
+  raised to the earlier quantity within stock; sold-out ones are listed and the bag only opens when
+  something is in it.
+- **Wishlist**: a heart on every product card (beside the card link, not inside it) and on the
+  product page. Signed-out shoppers are sent to sign in. The header shows how many are saved.

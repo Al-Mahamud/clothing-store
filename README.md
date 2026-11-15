@@ -27,6 +27,10 @@ Demo coupons: `WELCOME10` (10% off over ৳1,000, up to ৳500), `EID500` (৳50
 Demo product images are drawn by `backend/src/test/java/.../support/DemoArt.java` and written to
 `backend/storage/demo/`. Real photos are uploaded through the admin (phase 6).
 
+Demo account: mobile `01755555555`, password `tanti-demo` (Nadia, with a saved address, two past
+orders and three saved pieces). Sign-up codes in local runs appear at
+http://localhost:8080/api/v1/test-texts (texts are only logged).
+
 ## Frontend
 
 Needs Node.js 20.9+. The backend must be running; Next.js forwards `/api/v1` and `/media` to it

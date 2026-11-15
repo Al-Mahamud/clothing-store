@@ -6,11 +6,13 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 import type { CategoryNode, Collection } from "@/lib/types";
 import { Drawer } from "@/components/ui/Drawer";
+import { firstName, useAccount } from "@/components/account/AccountProvider";
 
 export function MobileMenu({ categories, collections }: { categories: CategoryNode[]; collections: Collection[] }) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(categories[0]?.id ?? null);
   const pathname = usePathname();
+  const { me } = useAccount();
   // eslint-disable-next-line react-hooks/set-state-in-effect -- close the menu after navigating.
   useEffect(() => setOpen(false), [pathname]);
 
@@ -58,7 +60,8 @@ export function MobileMenu({ categories, collections }: { categories: CategoryNo
           </div>
         </nav>
         <div className="grid grid-cols-2 gap-3 border-t border-line p-5 text-sm">
-          <Link href="/account" className="border border-ink py-3 text-center font-medium">Account</Link>
+          <Link href={me ? "/account" : "/login"} className="col-span-2 bg-ink py-3 text-center font-medium text-paper">{me ? `${firstName(me.name)}'s account` : "Sign in"}</Link>
+          <Link href="/account/wishlist" className="border border-line py-3 text-center font-medium">Wishlist</Link>
           <Link href="/track" className="border border-line py-3 text-center font-medium">Track order</Link>
         </div>
       </Drawer>

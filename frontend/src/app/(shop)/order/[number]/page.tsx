@@ -5,6 +5,7 @@ import { CheckCircle2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { first, type SearchParams } from "@/lib/listing";
 import { OrderDetails, StatusTimeline } from "@/components/order/OrderDetails";
+import { AccountNudge } from "@/components/account/AccountNudge";
 
 export const metadata: Metadata = { title: "Thank you", robots: { index: false } };
 
@@ -32,6 +33,7 @@ export default async function OrderPage({ params, searchParams }: Props) {
       </div>
       <div className="mt-12">
         <OrderDetails order={order} />
+        <AccountNudge />
       </div>
       <div className="mt-12 flex flex-wrap justify-center gap-3">
         <Link href="/shop" className="bg-ink px-8 py-3.5 text-sm font-medium text-paper hover:bg-clay">Continue shopping</Link>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ProductCard } from "@/lib/types";
 import { percentOff } from "@/lib/money";
 import { Price } from "@/components/ui/Price";
+import { SaveButton } from "@/components/account/SaveButton";
 
 /* eslint-disable @next/next/no-img-element -- product images are served by the backend as-is. */
 export function ProductCardView({ product, priority = false }: { product: ProductCard; priority?: boolean }) {
@@ -58,6 +59,8 @@ export function ProductCardView({ product, priority = false }: { product: Produc
           {extraColors > 0 && <span className="text-[0.6875rem] text-muted">+{extraColors}</span>}
         </div>
       )}
+      {/* Outside the link: a button can't sit inside one. */}
+      <div className="absolute right-2.5 top-2.5"><SaveButton productId={product.id} name={product.name} /></div>
     </article>
   );
 }

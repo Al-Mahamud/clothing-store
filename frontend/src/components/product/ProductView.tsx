@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Banknote, Heart, RefreshCcw, Truck } from "lucide-react";
+import { Banknote, RefreshCcw, Truck } from "lucide-react";
+import { SaveButton } from "@/components/account/SaveButton";
 import type { ProductDetail } from "@/lib/types";
 import { site } from "@/config/site";
 import { taka } from "@/lib/money";
@@ -148,9 +149,7 @@ export function ProductView({ product, initialColor }: { product: ProductDetail;
               soldOut={allSoldOut}
               onMissingSize={() => setSizeError(true)}
             />
-            <button type="button" aria-label="Save to wishlist" className="grid h-14 w-14 shrink-0 place-items-center border border-line transition hover:border-ink">
-              <Heart size={20} strokeWidth={1.6} />
-            </button>
+            <SaveButton productId={product.id} name={product.name} size="page" />
           </div>
 
           <ul className="mt-8 space-y-3 border-y border-line py-6 text-sm">
