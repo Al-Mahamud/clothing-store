@@ -1,12 +1,12 @@
 "use client";
 
+import { useDeliveryFees } from "@/lib/useDeliveryFees";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Banknote, Check, CreditCard, Lock, Plus } from "lucide-react";
 import { ApiError, request } from "@/lib/client";
 import { taka } from "@/lib/money";
-import { site } from "@/config/site";
 import type { PaymentOptions, Quote, SavedAddress, Zone } from "@/lib/types";
 import { useAccount } from "@/components/account/AccountProvider";
 import { Field } from "@/components/ui/Field";
@@ -30,6 +30,7 @@ const empty: Form = { name: "", phone: "", email: "", address: "", area: "", cit
 /* eslint-disable @next/next/no-img-element */
 export function CheckoutForm() {
   const { cart, refresh } = useCart();
+  const fees = useDeliveryFees();
   const router = useRouter();
   const [form, setForm] = useState<Form>(empty);
   const [quote, setQuote] = useState<Quote | null>(null);
@@ -151,7 +152,7 @@ export function CheckoutForm() {
     }
   };
 
-  const fee = form.zone === "DHAKA" ? site.deliveryFees.insideDhaka : site.deliveryFees.outsideDhaka;
+  const fee = form.zone === "DHAKA" ? fees.insideDhaka : fees.outsideDhaka;
 
   return (
     <form onSubmit={submit} noValidate className="container-page grid gap-10 py-10 lg:grid-cols-12 lg:gap-16 md:py-14">
@@ -199,8 +200,8 @@ export function CheckoutForm() {
             <legend className="mb-3 text-sm font-medium">Where should we deliver?</legend>
             <div className="grid gap-3 sm:grid-cols-2">
               {([
-                ["DHAKA", "Inside Dhaka", "1–2 days", site.deliveryFees.insideDhaka],
-                ["OUTSIDE", "Outside Dhaka", "2–4 days", site.deliveryFees.outsideDhaka],
+                ["DHAKA", "Inside Dhaka", "1–2 days", fees.insideDhaka],
+                ["OUTSIDE", "Outside Dhaka", "2–4 days", fees.outsideDhaka],
               ] as const).map(([value, label, time, price]) => (
                 <label key={value} className={`flex cursor-pointer items-start gap-3 border p-4 transition ${form.zone === value ? "border-ink bg-white/70" : "border-line hover:border-ink/40"}`}>
                   <input type="radio" name="zone" value={value} checked={form.zone === value} onChange={() => set("zone", value)} className="mt-1 accent-ink" />

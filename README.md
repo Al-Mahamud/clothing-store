@@ -31,6 +31,10 @@ Demo account: mobile `01755555555`, password `tanti-demo` (Nadia, with a saved a
 orders and three saved pieces). Sign-up codes in local runs appear at
 http://localhost:8080/api/v1/test-texts (texts are only logged).
 
+Admin area: http://localhost:3000/admin, staff mobile `01999999999`, password `tanti-admin-1`
+(Farhana, the store manager). On a real server the first staff account comes from `ADMIN_PHONE` and
+`ADMIN_PASSWORD`.
+
 Online payment in local runs goes to a fake SSLCommerz page (test sources only, no real money).
 For the real sandbox, set `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWORD` and a public `WEB_URL`.
 

@@ -2,7 +2,6 @@ package com.tanti.store.checkout;
 
 import com.tanti.store.checkout.CartService.Line;
 import com.tanti.store.shared.ApiException;
-import com.tanti.store.shared.StoreProperties;
 import com.tanti.store.shared.StoreProperties.Zone;
 import java.security.SecureRandom;
 import java.time.Clock;
@@ -40,17 +39,17 @@ public class CheckoutService {
     private final JdbcClient jdbc;
     private final CartService carts;
     private final Coupons coupons;
-    private final StoreProperties properties;
+    private final DeliveryFees fees;
     private final Clock clock;
     private final com.tanti.store.payment.PaymentService payments;
 
-    CheckoutService(JdbcClient jdbc, CartService carts, Coupons coupons, StoreProperties properties, Clock clock,
+    CheckoutService(JdbcClient jdbc, CartService carts, Coupons coupons, DeliveryFees fees, Clock clock,
                     com.tanti.store.payment.PaymentService payments) {
         this.payments = payments;
         this.jdbc = jdbc;
         this.carts = carts;
         this.coupons = coupons;
-        this.properties = properties;
+        this.fees = fees;
         this.clock = clock;
     }
 
@@ -73,8 +72,9 @@ public class CheckoutService {
     private Quote price(int subtotal, Coupons.Applied coupon, Zone zone) {
         int discount = coupon == null ? 0 : coupon.discount();
         int afterDiscount = subtotal - discount;
-        boolean free = (coupon != null && coupon.freeShipping()) || afterDiscount >= properties.delivery().freeOver();
-        int shipping = subtotal == 0 || free ? 0 : properties.delivery().fee(zone);
+        DeliveryFees.Fees delivery = fees.current();
+        boolean free = (coupon != null && coupon.freeShipping()) || afterDiscount >= delivery.freeOver();
+        int shipping = subtotal == 0 || free ? 0 : delivery.fee(zone);
         return new Quote(subtotal, discount, shipping, afterDiscount + shipping, coupon == null ? null : coupon.code());
     }
 

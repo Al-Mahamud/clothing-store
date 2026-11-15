@@ -208,7 +208,7 @@ Each phase ends with passing tests, a commit and a short note of what changed.
 | 3 | Cart and checkout | cart API and drawer, coupons, delivery fee, COD orders, thank-you page, tracking | done |
 | 4 | Accounts | register/sign in, cart merge, addresses, order history, wishlist | done |
 | 5 | Online payment | SSLCommerz with fake local gateway, payment expiry job | done |
-| 6 | Admin | dashboard, products editor with images, orders, categories, collections, coupons, customers | |
+| 6 | Admin | dashboard, products editor with images, orders, categories, collections, coupons, customers | done |
 | 7 | Reviews, notifications, SEO | reviews, order emails/SMS, metadata, sitemap, Open Graph images | |
 | 8 | Launch readiness | Docker, Caddy, backups, CI, real payment credentials, content pages | |
 
@@ -261,3 +261,32 @@ Each phase ends with passing tests, a commit and a short note of what changed.
   Online payment is hidden until the credentials are set. Local runs use a fake gateway from the
   test sources ("TEST GATEWAY · NOT REAL MONEY").
 - Order texts (confirmed, on the way, cancelled) are left for phase 7.
+
+### Notes from phase 6 (admin)
+
+- Ported from the tree shop's admin (itself from Haat's), with a product editor rewritten for
+  clothes and every screen in Tanti's look. Staff sign in at `/admin` with a mobile number and
+  password (kept apart from customer accounts). Everyone on the team can do everything; switching
+  someone off signs them out at once, and nobody can switch off themselves or the last account.
+- **Orders**: a "to do" queue (placed, confirmed, on the way), oldest first, filterable by inside or
+  outside Dhaka. Placed → Confirmed → Sent out → Delivered. Sending out records the courier and its
+  tracking number, which the shopper then sees on their order page. A sent order can still be
+  cancelled when the courier brings it back, with a choice to leave the pieces out of stock (stained
+  or damaged). Cancelling a paid order shows a refund due; the refund is made in the SSLCommerz panel
+  and its reference recorded here. Cash orders count as paid when delivered. Print gives a packing slip.
+- **Product editor**: name, category, fabric, fit, care, description, one price (with an optional old
+  price for a sale) and the size guide; colours, each with a swatch and the family shoppers filter by
+  (choosing the family sets the swatch unless it was picked by hand); sizes added from presets (S–XXL,
+  XS–XL, waist 28–36, kids 2–11 years, free size) or typed; and a colour × size grid where each box is
+  either offered with its stock or not. SKUs are suggested (NAME-COL-SIZE) and can be edited. It all
+  saves at once; two sizes or colours can swap in one save. Removing a colour keeps its pictures as
+  shared ones. A product on sale needs at least one size, and every colour needs a size. Customers
+  were left out of v1 of the admin: an order shows how many orders the same number has placed.
+- **Pictures** save as they are uploaded (JPEG, PNG or WebP, checked by their bytes, up to 5 MB), each
+  shown with every colour or with one colour only; the first is the one on cards.
+- **Stock**: one small grid per product (colours × its sizes), saved per box. "Running low" means 3
+  or fewer (`store.admin.low-stock`).
+- **Categories** (two levels, with a picture and description) and **collections** (banner, tagline,
+  order on the home page, hidden or shown). Web addresses are fixed when made.
+- **Delivery fees** are set in the admin and stored in the database; the shop, bag and checkout read
+  them from `GET /api/v1/delivery`. Until they are saved, the fees in `application.yml` apply.

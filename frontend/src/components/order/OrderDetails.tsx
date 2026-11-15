@@ -81,10 +81,15 @@ export function OrderDetails({ order }: { order: OrderView }) {
           <p className="text-ink-soft">{order.area}, {order.city}</p>
           <p className="text-ink-soft">{order.phone}</p>
           {order.note && <p className="mt-2 text-xs italic text-muted">“{order.note}”</p>}
+          {order.courier && (
+            <p className="mt-3 border-l-2 border-clay bg-white/60 px-3 py-2 text-xs">
+              Sent with <strong className="font-medium">{order.courier}</strong>{order.trackingCode && <> · tracking number <strong className="font-mono font-medium">{order.trackingCode}</strong></>}
+            </p>
+          )}
         </div>
         <div>
           <h2 className="eyebrow mb-3">Payment</h2>
-          <p>{order.paymentStatus === "PAID" ? (order.status === "CANCELLED" ? "Paid online — refund on its way" : "Paid online") : order.paymentStatus === "REFUNDED" ? "Refunded" : order.paymentMethod === "COD" ? (order.status === "CANCELLED" ? "Nothing to pay" : `Cash on delivery — please keep ${taka(order.total)} ready.`) : order.status === "CANCELLED" ? "Not paid" : "Online, waiting for payment"}</p>
+          <p>{order.paymentStatus === "PAID" ? (order.status === "CANCELLED" ? "Paid online — refund on its way" : order.paymentMethod === "COD" ? "Paid in cash" : "Paid online") : order.paymentStatus === "REFUNDED" ? "Refunded" : order.paymentMethod === "COD" ? (order.status === "CANCELLED" ? "Nothing to pay" : `Cash on delivery — please keep ${taka(order.total)} ready.`) : order.status === "CANCELLED" ? "Not paid" : "Online, waiting for payment"}</p>
         </div>
       </div>
     </div>

@@ -8,12 +8,12 @@ import { BagButton } from "./BagButton";
 
 /* eslint-disable @next/next/no-img-element */
 export async function Header() {
-  const [categories, collections] = await Promise.all([api.categories(), api.collections()]);
+  const [categories, collections, fees] = await Promise.all([api.categories(), api.collections(), api.delivery()]);
   return (
     <>
       <div className="bg-ink text-paper">
         <p className="container-page py-2 text-center text-[0.6875rem] tracking-[0.12em] uppercase">
-          Free delivery over ৳{site.freeDeliveryOver.toLocaleString("en-IN")}
+          Free delivery over ৳{fees.freeOver.toLocaleString("en-IN")}
           <span className="hidden sm:inline">
             <span className="mx-3 text-paper/40">·</span>
             Cash on delivery across Bangladesh

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Banknote, RefreshCcw, Truck } from "lucide-react";
 import { SaveButton } from "@/components/account/SaveButton";
 import type { ProductDetail } from "@/lib/types";
-import { site } from "@/config/site";
+import { useDeliveryFees } from "@/lib/useDeliveryFees";
 import { taka } from "@/lib/money";
 import { Price } from "@/components/ui/Price";
 import { Gallery } from "./Gallery";
@@ -15,6 +15,7 @@ import { AddToBag } from "./AddToBag";
 const LOW_STOCK = 3;
 
 export function ProductView({ product, initialColor }: { product: ProductDetail; initialColor?: string }) {
+  const fees = useDeliveryFees();
   const startColor = product.colors.find((c) => c.name.toLowerCase() === initialColor?.toLowerCase()) ?? product.colors[0];
   const [colorId, setColorId] = useState(startColor?.id);
   const [size, setSize] = useState<string | null>(null);
@@ -156,8 +157,8 @@ export function ProductView({ product, initialColor }: { product: ProductDetail;
             <li className="flex gap-3">
               <Truck size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-clay" />
               <span>
-                Inside Dhaka 1–2 days ({taka(site.deliveryFees.insideDhaka)}), outside Dhaka 2–4 days ({taka(site.deliveryFees.outsideDhaka)}).
-                <span className="text-muted"> Free over {taka(site.freeDeliveryOver)}.</span>
+                Inside Dhaka 1–2 days ({taka(fees.insideDhaka)}), outside Dhaka 2–4 days ({taka(fees.outsideDhaka)}).
+                <span className="text-muted"> Free over {taka(fees.freeOver)}.</span>
               </span>
             </li>
             <li className="flex gap-3">

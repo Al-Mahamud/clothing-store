@@ -7,6 +7,7 @@ export const site = {
   phone: "+880 1700-000000",
   email: "hello@tanti.example",
   address: "House 12, Road 5, Dhanmondi, Dhaka 1205",
+  /** Only a fallback: the shop sets delivery fees in the admin area. */
   freeDeliveryOver: 3000,
   deliveryFees: { insideDhaka: 70, outsideDhaka: 130 },
   social: {

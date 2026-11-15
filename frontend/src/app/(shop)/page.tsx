@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { ArrowRight, Banknote, RefreshCcw, ShieldCheck, Truck } from "lucide-react";
 import { api } from "@/lib/api";
-import { site } from "@/config/site";
-import type { Collection } from "@/lib/types";
+import type { Collection, DeliveryFees } from "@/lib/types";
 import { ProductRail } from "@/components/shop/ProductRail";
 import { ProductGrid } from "@/components/shop/ProductGrid";
 import { SectionHeading } from "@/components/shop/SectionHeading";
 
 /* eslint-disable @next/next/no-img-element */
 export default async function HomePage() {
-  const home = await api.home();
+  const [home, fees] = await Promise.all([api.home(), api.delivery()]);
   const [hero, ...editorials] = home.collections;
 
   return (
@@ -58,7 +57,7 @@ export default async function HomePage() {
         <ProductGrid products={home.bestSellers} eager={0} />
       </section>
 
-      <Promises />
+      <Promises fees={fees} />
 
       {editorials[1] && <Editorial collection={editorials[1]} reverse />}
     </>
@@ -118,9 +117,9 @@ function Editorial({ collection, reverse = false }: { collection: Collection; re
   );
 }
 
-function Promises() {
+function Promises({ fees }: { fees: DeliveryFees }) {
   const items = [
-    { icon: Truck, title: "Free delivery", text: `On orders over ৳${site.freeDeliveryOver.toLocaleString("en-IN")}, anywhere in Bangladesh.` },
+    { icon: Truck, title: "Free delivery", text: `On orders over ৳${fees.freeOver.toLocaleString("en-IN")}, anywhere in Bangladesh.` },
     { icon: Banknote, title: "Cash on delivery", text: "Pay when your parcel arrives. No advance needed." },
     { icon: RefreshCcw, title: "7-day exchange", text: "Wrong size? Swap it within a week, free." },
     { icon: ShieldCheck, title: "Secure checkout", text: "Cards, bKash and Nagad through SSLCommerz." },
